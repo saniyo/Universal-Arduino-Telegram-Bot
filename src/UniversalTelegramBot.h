@@ -1,30 +1,6 @@
-/*
-Copyright (c) 2018 Brian Lough. All right reserved.
-
-UniversalTelegramBot - Library to create your own Telegram Bot using
-ESP8266 or ESP32 on Arduino IDE.
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-*/
-
 #ifndef UniversalTelegramBot_h
 #define UniversalTelegramBot_h
 
-//#define TELEGRAM_DEBUG 1
-#define ARDUINOJSON_DECODE_UNICODE 1
-#define ARDUINOJSON_USE_LONG_LONG 1
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Client.h>
@@ -33,9 +9,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #define TELEGRAM_HOST "api.telegram.org"
 #define TELEGRAM_SSL_PORT 443
 #define HANDLE_MESSAGES 1
-
-//unmark following line to enable debug mode
-//#define _debug
 
 typedef bool (*MoreDataAvailable)();
 typedef byte (*GetNextByte)();
@@ -72,26 +45,24 @@ public:
   String getToken();
   String sendGetToTelegram(const String& command);
   String sendPostToTelegram(const String& command, JsonObject payload);
-  String
-  sendMultipartFormDataToTelegram(const String& command, const String& binaryPropertyName,
-                                  const String& fileName, const String& contentType,
-                                  const String& chat_id, int fileSize,
-                                  MoreDataAvailable moreDataAvailableCallback,
-                                  GetNextByte getNextByteCallback, 
-                                  GetNextBuffer getNextBufferCallback, 
-                                  GetNextBufferLen getNextBufferLenCallback);
+  String sendMultipartFormDataToTelegram(const String& command, const String& binaryPropertyName,
+                                         const String& fileName, const String& contentType,
+                                         const String& chat_id, int fileSize,
+                                         MoreDataAvailable moreDataAvailableCallback,
+                                         GetNextByte getNextByteCallback, 
+                                         GetNextBuffer getNextBufferCallback, 
+                                         GetNextBufferLen getNextBufferLenCallback);
 
   bool readHTTPAnswer(String &body, String &headers);
   bool getMe();
 
-  bool sendSimpleMessage(const String& chat_id, const String& text, const String& parse_mode);
+  bool sendSimpleMessage(const String& chat_id, const String& text, const String& parse_mode = "", int message_thread_id = 0);
   bool sendMessage(const String& chat_id, const String& text, const String& parse_mode = "", int message_id = 0);
-  bool sendMessageWithReplyKeyboard(const String& chat_id, const String& text,
-                                    const String& parse_mode, const String& keyboard,
-                                    bool resize = false, bool oneTime = false,
-                                    bool selective = false);
-  bool sendMessageWithInlineKeyboard(const String& chat_id, const String& text,
-                                     const String& parse_mode, const String& keyboard, int message_id = 0);
+  bool sendMessageToThread(const String& chat_id, const String& text, const String& parse_mode, int message_id, int message_thread_id);
+  bool sendMessageWithReplyKeyboard(const String& chat_id, const String& text, const String& parse_mode, const String& keyboard,
+                                    bool resize = false, bool oneTime = false, bool selective = false, int message_thread_id = 0);
+  bool sendMessageWithInlineKeyboard(const String& chat_id, const String& text, const String& parse_mode, const String& keyboard,
+                                     int message_id = 0, int message_thread_id = 0);
 
   bool sendChatAction(const String& chat_id, const String& text);
 
@@ -103,14 +74,11 @@ public:
                            GetNextBuffer getNextBufferCallback, 
                            GetNextBufferLen getNextBufferLenCallback);
   String sendPhoto(const String& chat_id, const String& photo, const String& caption = "",
-                   bool disable_notification = false,
-                   int reply_to_message_id = 0, const String& keyboard = "");
+                   bool disable_notification = false, int reply_to_message_id = 0,
+                   const String& keyboard = "", int message_thread_id = 0);
 
-  bool answerCallbackQuery(const String &query_id,
-                           const String &text = "",
-                           bool show_alert = false,
-                           const String &url = "",
-                           int cache_time = 0);
+  bool answerCallbackQuery(const String &query_id, const String &text = "", bool show_alert = false,
+                           const String &url = "", int cache_time = 0);
 
   bool setMyCommands(const String& commandArray);
 
@@ -129,7 +97,6 @@ public:
   int maxMessageLength = 1500;
 
 private:
-  // JsonObject * parseUpdates(String response);
   String _token;
   Client *client;
   void closeClient();
